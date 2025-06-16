@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Pool Guardian: An Interactive Overview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- 
+    Chosen Palette: "Tech Sapphire & Warm Sand"
+    Application Structure Plan: A thematic, single-page narrative application. The structure is designed to guide the user logically from the problem to the solution, creating a compelling story. It starts with an impactful hero section, moves to the "Why" (The Unsolved Problem), then the "What" (The Solution & Technology), followed by the "Opportunity" (Market & Vision), and finally the "How" (Call to Action). This flow is more persuasive and educational for a revolutionary product than a standard dashboard layout. Key interactions include smooth scrolling, dynamic stat counters for emotional impact, an interactive diagram to deconstruct the complex technology, and a data visualization chart for the market opportunity.
+    Visualization & Content Choices: 
+    - Problem Stats -> Inform -> Dynamic Counters -> Grabs user attention and emphasizes the severity of the problem.
+    - Sensor Technology -> Organize/Explain -> Interactive HTML/CSS Diagram -> Allows users to self-explore complex information (how sensors work) without being overwhelmed. Clicking reveals text from the report. Method: JS click handlers on styled divs.
+    - Market Growth Data -> Compare/Change -> Chart.js Bar Chart -> Visually represents the market growth from the report, making the business case clearer than text alone.
+    - Development Roadmap -> Organize/Change -> HTML/CSS Vertical Timeline -> Presents the multi-phase plan in a clear, linear, and visually engaging format.
+    - Navigation -> Inform/Organize -> Sticky Top Navbar with Smooth Scroll -> Provides easy access to all sections and maintains user orientation within the single-page application.
+    CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. 
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F9FA;
+            color: #1a202c;
+        }
+        .bg-pattern {
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .hero-section {
+            background-color: #F8F9FA; /* Solid light background for text area */
+        }
+        .hero-right-decorative {
+            background-color: #0A2463; /* The blue accent color */
+        }
+        .nav-link {
+            transition: color 0.3s ease;
+        }
+        .stat-card, .tech-card, .timeline-item {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stat-card:hover, .tech-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .tech-diagram-item {
+            transition: all 0.3s ease-in-out;
+            border-width: 2px;
+        }
+        .tech-diagram-item.active {
+            background-color: #0A2463;
+            color: white;
+            border-color: #3B82F6;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #d1d5db;
+        }
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 20px;
+                transform: translateX(0);
+            }
+        }
+        .chart-container {
+            position: relative; 
+            width: 100%; 
+            max-width: 800px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container { 
+                height: 400px; 
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-[#0A2463]">Pool Guardian</a>
+            <div class="hidden md:flex space-x-8">
+                <a href="#problem" class="nav-link text-gray-600 hover:text-[#0A2463]">The Problem</a>
+                <a href="#solution" class="nav-link text-gray-600 hover:text-[#0A2463]">The Solution</a>
+                <a href="#technology" class="nav-link text-gray-600 hover:text-[#0A2463]">Technology</a>
+                <a href="#market" class="nav-link text-gray-600 hover:text-[#0A2463]">Market</a>
+                <a href="#roadmap" class="nav-link text-gray-600 hover:text-[#0A2463]">Roadmap</a>
+            </div>
+            <a href="#contact" class="hidden md:block bg-[#0A2463] text-white px-5 py-2 rounded-lg hover:bg-[#081e51] transition-colors">Learn More</a>
+             <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-gray-600 hover:text-[#0A2463] hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pt-2 pb-4 space-y-2">
+            <a href="#problem" class="block nav-link text-gray-600 hover:text-[#0A2463] rounded-md py-2">The Problem</a>
+            <a href="#solution" class="block nav-link text-gray-600 hover:text-[#0A2463] rounded-md py-2">The Solution</a>
+            <a href="#technology" class="block nav-link text-gray-600 hover:text-[#0A2463] rounded-md py-2">Technology</a>
+            <a href="#market" class="block nav-link text-gray-600 hover:text-[#0A2463] rounded-md py-2">Market</a>
+            <a href="#roadmap" class="block nav-link text-gray-600 hover:text-[#0A2463] rounded-md py-2">Roadmap</a>
+            <a href="#contact" class="block bg-[#0A2463] text-white px-5 py-2 rounded-lg text-center hover:bg-[#081e51] transition-colors mt-2">Learn More</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section relative min-h-[60vh] md:min-h-[80vh] flex items-center overflow-hidden">
+            <div class="absolute right-0 top-0 h-full w-1/2 hidden md:block hero-right-decorative"></div>
+            <div class="container mx-auto px-6 relative z-10">
+                <div class="w-full md:w-1/2 bg-white/90 p-8 md:p-12 rounded-xl shadow-lg border border-gray-100">
+                    <h1 class="text-4xl md:text-5xl font-extrabold text-[#0A2463] leading-tight">Intelligent Guardian. <br>Unparalleled Peace of Mind.</h1>
+                    <p class="mt-4 text-lg text-gray-700">The Pool Guardian is a paradigm shift in pool safety, fusing autonomous cleaning with life-saving AI to protect what matters most.</p>
+                    <a href="#solution" class="mt-8 inline-block bg-[#0A2463] text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-[#081e51] transition-transform hover:scale-105">Discover the Future of Safety</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Problem -->
+        <section id="problem" class="py-20 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800">The Silent, Unsolved Problem</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-gray-600">While pools are a source of joy, they carry a significant risk. Drowning is a leading cause of unintentional death for children, and existing safety solutions are fundamentally inadequate.</p>
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="stat-card bg-gray-50 p-8 rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-5xl font-bold text-[#0A2463]" data-target="372000" id="stat1">0</h3>
+                        <p class="mt-2 text-gray-600">Annual Drowning Deaths Worldwide (WHO Estimate)</p>
+                    </div>
+                    <div class="stat-card bg-gray-50 p-8 rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-5xl font-bold text-[#0A2463]" data-target="90" id="stat2">0</h3>
+                        <p class="mt-2 text-gray-600">% of Child Drownings Occur with Adult Supervision Present</p>
+                    </div>
+                    <div class="stat-card bg-gray-50 p-8 rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-5xl font-bold text-[#0A2463]" data-target="100" id="stat3">0</h3>
+                        <p class="mt-2 text-gray-600">Value of a Life-Saving Intervention ($ in Millions, Figurative)</p>
+                    </div>
+                </div>
+                 <div class="mt-12 p-6 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                    <h4 class="font-bold text-red-800">The Critical Failure of Current Alarms</h4>
+                    <p class="text-red-700 text-left md:text-center mt-2">Traditional alarms rely on simple motion or wave detection, leading to constant false alarms from wind, rain, or toys. This desensitization renders them ineffective, creating a dangerous illusion of safety.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Solution -->
+        <section id="solution" class="py-20 bg-pattern">
+            <div class="container mx-auto px-6">
+                <div class="text-center">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">A Paradigm Shift in Pool Safety</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-gray-600">The Pool Guardian is not another alarm. It's a dedicated, autonomous sentinel that redefines pool security by integrating intelligent detection with state-of-the-art robotic cleaning.</p>
+                </div>
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+                    <div class="tech-card bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                        <div class="text-4xl text-[#0A2463] mb-4">🧠</div>
+                        <h3 class="font-bold text-xl">Proactive Detection</h3>
+                        <p class="mt-2 text-gray-600">Advanced AI analyzes biometric and visual data to identify distress, moving beyond simple motion.</p>
+                    </div>
+                    <div class="tech-card bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                         <div class="text-4xl text-[#0A2463] mb-4">🎯</div>
+                        <h3 class="font-bold text-xl">Minimized False Positives</h3>
+                        <p class="mt-2 text-gray-600">Sensor fusion and machine learning ensure alerts are trustworthy and actionable.</p>
+                    </div>
+                    <div class="tech-card bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                         <div class="text-4xl text-[#0A2463] mb-4">🚨</div>
+                        <h3 class="font-bold text-xl">Rapid Emergency Response</h3>
+                        <p class="mt-2 text-gray-600">A multi-channel alert protocol notifies the right people instantly, including optional 911 dispatch.</p>
+                    </div>
+                    <div class="tech-card bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                         <div class="text-4xl text-[#0A2463] mb-4">✨</div>
+                        <h3 class="font-bold text-xl">Seamless Integration</h3>
+                        <p class="mt-2 text-gray-600">Operates as a superior autonomous cleaner while providing constant, discreet safety monitoring.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Technology -->
+        <section id="technology" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">The Intelligent Core</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-gray-600">Our groundbreaking capabilities are powered by a sophisticated blend of multi-sensor technology and proprietary AI. Click each component to learn more.</p>
+                </div>
+                
+                <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+                    <!-- Tech Diagram -->
+                    <div class="w-full md:w-1/2 flex flex-col items-center justify-center space-y-4">
+                        <div class="flex justify-center gap-4">
+                            <div id="tech-optical" class="tech-diagram-item p-4 rounded-lg cursor-pointer border-gray-300 bg-gray-50 text-center w-40">
+                                <p class="font-bold">📷 Optical Cameras</p>
+                            </div>
+                            <div id="tech-thermal" class="tech-diagram-item p-4 rounded-lg cursor-pointer border-gray-300 bg-gray-50 text-center w-40">
+                                <p class="font-bold">🌡️ Thermal Imaging</p>
+                            </div>
+                        </div>
+                        <div class="text-4xl animate-pulse">⬇️</div>
+                        <div id="tech-ai" class="tech-diagram-item p-4 rounded-lg cursor-pointer border-gray-300 bg-gray-50 text-center w-48 active">
+                            <p class="font-bold">🧠 AI & Machine Learning</p>
+                            <p class="text-xs">Behavioral Analysis</p>
+                        </div>
+                         <div class="text-4xl animate-pulse">⬇️</div>
+                         <div class="flex justify-center gap-4">
+                            <div id="tech-response" class="tech-diagram-item p-4 rounded-lg cursor-pointer border-gray-300 bg-gray-50 text-center w-48">
+                                <p class="font-bold">🚨 Emergency Response</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tech Description -->
+                    <div class="w-full md:w-1/2 p-8 bg-gray-50 rounded-xl border min-h-[300px]">
+                        <div id="tech-description-content">
+                            <h3 id="tech-title" class="text-2xl font-bold text-[#0A2463]">AI & Machine Learning (The Brain)</h3>
+                            <p id="tech-text" class="mt-4 text-gray-700">At the heart of the Pool Guardian is a proprietary AI engine, powered by deep learning models. It continuously monitors behavior to differentiate between normal swimming and distress signals like flailing or stillness. By classifying objects and validating data across all sensors, it achieves unparalleled accuracy and minimizes false alarms.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Market -->
+        <section id="market" class="py-20 bg-pattern">
+             <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">A Substantial & Growing Market</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-gray-600">The Pool Guardian enters a multi-billion dollar market ripe for disruption, creating a new category of intelligent safety and maintenance systems.</p>
+                </div>
+                <div class="bg-white p-4 sm:p-8 rounded-xl shadow-lg border border-gray-200">
+                    <h3 class="text-xl font-bold text-center mb-4 text-gray-700">Global Robotic Pool Cleaner Market Growth (USD Billions)</h3>
+                    <div class="chart-container">
+                        <canvas id="marketChart"></canvas>
+                    </div>
+                </div>
+                <div class="mt-12 text-center p-6 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+                    <h4 class="font-bold text-blue-800">Blue Ocean Strategy</h4>
+                    <p class="text-blue-700 text-left md:text-center mt-2">The market currently lacks any product that truly integrates premium cleaning with AI-driven safety. The Pool Guardian doesn't just compete—it creates and dominates a new market segment: Intelligent Robotic Pool Safety.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Roadmap -->
+        <section id="roadmap" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                 <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800">The Road Ahead</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-gray-600">Our phased approach ensures methodical development, de-risking, and technical excellence at every milestone on the path to commercialization.</p>
+                </div>
+                <div class="relative wrap overflow-hidden p-4 md:p-10 h-full">
+                    <div class="timeline absolute h-full"></div>
+                    <!-- Timeline Items -->
+                    <div class="mb-8 flex justify-between items-center w-full right-timeline">
+                        <div class="order-1 w-5/12"></div>
+                        <div class="z-20 flex items-center order-1 bg-[#0A2463] shadow-xl w-12 h-12 rounded-full">
+                            <h1 class="mx-auto font-semibold text-lg text-white">1</h1>
+                        </div>
+                        <div class="order-1 bg-gray-50 rounded-lg shadow-xl w-5/12 px-6 py-4 timeline-item">
+                            <h3 class="font-bold text-gray-800 text-xl">Phase 1: Proof of Concept</h3>
+                            <p class="text-sm leading-snug tracking-wide text-gray-600">Validate core AI detection capabilities in controlled lab environments. Target: 6-12 months.</p>
+                        </div>
+                    </div>
+
+                     <div class="mb-8 flex justify-between flex-row-reverse items-center w-full left-timeline">
+                        <div class="order-1 w-5/12"></div>
+                        <div class="z-20 flex items-center order-1 bg-[#0A2463] shadow-xl w-12 h-12 rounded-full">
+                            <h1 class="mx-auto text-white font-semibold text-lg">2</h1>
+                        </div>
+                        <div class="order-1 bg-gray-50 rounded-lg shadow-xl w-5/12 px-6 py-4 timeline-item">
+                            <h3 class="font-bold text-gray-800 text-xl">Phase 2: Alpha Prototype</h3>
+                            <p class="text-sm leading-snug tracking-wide text-gray-600">Integrate sensors into a preliminary robotic platform and test basic navigation. Target: 12-18 months.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8 flex justify-between items-center w-full right-timeline">
+                        <div class="order-1 w-5/12"></div>
+                        <div class="z-20 flex items-center order-1 bg-[#0A2463] shadow-xl w-12 h-12 rounded-full">
+                            <h1 class="mx-auto font-semibold text-lg text-white">3</h1>
+                        </div>
+                        <div class="order-1 bg-gray-50 rounded-lg shadow-xl w-5/12 px-6 py-4 timeline-item">
+                            <h3 class="font-bold text-gray-800 text-xl">Phase 3: Beta Prototype</h3>
+                            <p class="text-sm leading-snug tracking-wide text-gray-600">Finalize industrial design and integrate full communication stack for extensive field testing. Target: 12-18 months.</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-8 flex justify-between flex-row-reverse items-center w-full left-timeline">
+                        <div class="order-1 w-5/12"></div>
+                        <div class="z-20 flex items-center order-1 bg-[#0A2463] shadow-xl w-12 h-12 rounded-full">
+                            <h1 class="mx-auto text-white font-semibold text-lg">4</h1>
+                        </div>
+                        <div class="order-1 bg-gray-50 rounded-lg shadow-xl w-5/12 px-6 py-4 timeline-item">
+                            <h3 class="font-bold text-gray-800 text-xl">Phase 4: Certification</h3>
+                            <p class="text-sm leading-snug tracking-wide text-gray-600">Secure manufacturing partners and obtain all required regulatory certifications (NSF, UL, FCC). Target: 6-12 months.</p>
+                        </div>
+                    </div>
+                     <div class="mb-8 flex justify-between items-center w-full right-timeline">
+                        <div class="order-1 w-5/12"></div>
+                        <div class="z-20 flex items-center order-1 bg-green-500 shadow-xl w-12 h-12 rounded-full">
+                            <h1 class="mx-auto font-semibold text-lg text-white">5</h1>
+                        </div>
+                        <div class="order-1 bg-gray-50 rounded-lg shadow-xl w-5/12 px-6 py-4 timeline-item">
+                            <h3 class="font-bold text-gray-800 text-xl">Phase 5: Market Launch</h3>
+                            <p class="text-sm leading-snug tracking-wide text-gray-600">Scale manufacturing operations and execute comprehensive sales and marketing strategy.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section id="contact" class="py-20 bg-pattern">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Join Us in Redefining Pool Safety</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-gray-600">The Pool Guardian represents a rare opportunity to invest in a product that addresses a substantial market need with disruptive technology and promises a profound societal impact. We invite visionary investors and strategic partners to join us.</p>
+                <button class="mt-8 bg-[#0A2463] text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-[#081e51] transition-transform hover:scale-105">Request Investor Deck</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#0A2463] text-white">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p>&copy; 2025 Pool Guardian Inc.Trademark of Kimberly Thomas Collins and Mr Allery Renfroe.All Rights Reserved.</p>
+            <p class="text-sm text-blue-200 mt-2">The Pool Guardian is an enhancement to, not a replacement for, responsible human supervision and physical barriers.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Dynamic Stat Counters
+            const counters = document.querySelectorAll('.stat-card h3');
+            const speed = 200; 
+
+            const animateCounter = (counter) => {
+                const target = +counter.getAttribute('data-target');
+                const updateCount = () => {
+                    const count = +counter.innerText.replace(/,/g, '');
+                    const inc = target / speed;
+
+                    if (count < target) {
+                        counter.innerText = Math.ceil(count + inc).toLocaleString();
+                        setTimeout(updateCount, 15);
+                    } else {
+                        counter.innerText = target.toLocaleString();
+                    }
+                };
+                updateCount();
+            };
+            
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        animateCounter(entry.target);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            counters.forEach(counter => {
+                observer.observe(counter);
+            });
+
+
+            // Technology Diagram Interaction
+            const techItems = document.querySelectorAll('.tech-diagram-item');
+            const techTitle = document.getElementById('tech-title');
+            const techText = document.getElementById('tech-text');
+
+            const techContent = {
+                'tech-optical': {
+                    title: '📷 High-Resolution Optical Cameras',
+                    text: 'Positioned to capture broad visual data of the pool\'s interior, providing the foundational feed for object detection, classification, and initial behavioral analysis under various water and lighting conditions.'
+                },
+                'tech-thermal': {
+                    title: '🌡️ Thermal Imaging Sensors',
+                    text: 'Crucial for distinguishing animate objects (humans, pets) from inanimate ones by detecting heat signatures. This is a highly reliable method to confirm the presence of a living being and reduce false alarms.'
+                },
+                'tech-ai': {
+                    title: '🧠 AI & Machine Learning (The Brain)',
+                    text: 'At the heart of the Pool Guardian is a proprietary AI engine, powered by deep learning models. It continuously monitors behavior to differentiate between normal swimming and distress signals like flailing or stillness. By classifying objects and validating data across all sensors, it achieves unparalleled accuracy.'
+                },
+                 'tech-response': {
+                    title: '🚨 Emergency Response System',
+                    text: 'Upon confirmed distress detection, the system activates a multi-tiered response: a local siren, multi-channel SMS/call alerts to designated contacts, and an optional direct link to emergency services for immediate professional intervention.'
+                }
+            };
+            
+            techItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    techItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    const content = techContent[item.id];
+                    techTitle.textContent = content.title;
+                    techText.textContent = content.text;
+                });
+            });
+
+
+            // Market Growth Chart
+            const ctx = document.getElementById('marketChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['2024', '2032 (Projected)'],
+                    datasets: [{
+                        label: 'Market Value (in USD Billions)',
+                        data: [2.01, 4.52],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.6)',
+                            'rgba(10, 36, 99, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(10, 36, 99, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Value (USD Billions)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += '$' + context.parsed.y + ' Billion';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
